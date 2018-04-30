@@ -172,7 +172,11 @@ module Opal
     def compile
       parse
 
-      @fragments = process(@sexp).flatten
+      begin
+        @fragments = process(@sexp).flatten
+      rescue => error
+        raise ::Opal.error_with_opal_backtrace(error, file)
+      end
 
       @result = @fragments.map(&:code).join('')
     end
@@ -186,7 +190,7 @@ module Opal
       begin
         sexp, comments, tokens = @parser.tokenize(@buffer)
       rescue ::Opal::Error, ::Parser::SyntaxError => error
-        raise ::Opal::SyntaxError.with_opal_backtrace(error, file)
+        raise ::Opal.error_with_opal_backtrace(error, file, ::Opal::SyntaxError)
       end
 
       @sexp = s(:top, sexp || s(:nil))

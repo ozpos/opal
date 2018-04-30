@@ -29,15 +29,15 @@ module Opal
 
   class SyntaxError < ::SyntaxError
     attr_accessor :location
+  end
 
-    # Not redefining #backtrace because of https://bugs.ruby-lang.org/issues/14693
-    def self.with_opal_backtrace(error, path)
-      new_error = new(error.message)
-      backtrace = error.backtrace.to_a
-      backtrace.unshift OpalBacktraceLocation.new(error, path).to_s
-      new_error.set_backtrace backtrace
-      new_error
-    end
+  # Not redefining #backtrace because of https://bugs.ruby-lang.org/issues/14693
+  def self.error_with_opal_backtrace(error, path, error_class = nil)
+    new_error = error_class ? error_class.new(error.message) : error.dup
+    backtrace = error.backtrace.to_a
+    backtrace.unshift OpalBacktraceLocation.new(error, path).to_s
+    new_error.set_backtrace backtrace
+    new_error
   end
 
   # Loosely compatible with Thread::Backtrace::Location
